@@ -3,6 +3,10 @@ wedump.core = {};
 wedump.core.drawingEngine = {};
 wedump.core.drawingEngine.detail = {};
 
+/**
+ * DetailControl : Sketch 후 위치에 대한 상세제어를 제공
+ * Type : Class
+ */
 wedump.core.drawingEngine.detail.DetailControl = function() {
 	var public = wedump.core.drawingEngine.detail.DetailControl.prototype;
 
