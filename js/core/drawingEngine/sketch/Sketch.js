@@ -4,8 +4,8 @@ wedump.core.drawingEngine = {};
 wedump.core.drawingEngine.sketch = {};
 
 /**
- * Sketch : 화면 스케치의 템플릿 메소드를 제공
- * Type : Abstract Class
+ * Sketch : 화면 스케치의 알고리즘 인터페이스를 제공
+ * @type {Abstract Class}
  */
 wedump.core.drawingEngine.sketch.Sketch = function() {
 	this.component;
