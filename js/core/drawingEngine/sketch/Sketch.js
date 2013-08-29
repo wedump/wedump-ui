@@ -1,51 +1,62 @@
-var wedump = {};
-wedump.core = {};
-wedump.core.drawingEngine = {};
-wedump.core.drawingEngine.sketch = {};
-
 /**
  * Sketch : 화면 스케치의 알고리즘 인터페이스를 제공
  * @type {Abstract Class}
  */
-wedump.core.drawingEngine.sketch.Sketch = function() {
-	this.component;
-	this.sketchRules;
+wedump.core.drawingEngine.sketch.Sketch = function(strSketch, arrSketchObj, component) {	
+	this.strSketch = strSketch; // 스케치 문자열
+	this.arrSketchObj = arrSketchObj; // 스케치 문자열과 매칭되는 스케치 객체 배열
+	this.component = component; // 컴포넌트 객체
+	this.arrSketchComp; // 스케치 컴포넌트 객체 배열
 };
 
 wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	/**
 	 * (public)
-	 * draw : 스케치의 템플릿 메소드(알고리즘 골격)
+	 * draw : 스케치의 템플릿 메소드(알고리즘 골격)	 	 
 	 */
-	draw : function() {
+	draw : function() {		
 		this.sortAttribute();
-		this.getCss();
+		this.sortSketchComponent();
+		this.applyCss();
 		this.rerendering();
 	},
 
 	/**
 	 * (public)
-	 * sortAttribute : 스케치를 파싱하여 속성을 구분하여 정렬해 놓는다.
-	 * @return {미정} 미정
+	 * sortAttribute : 셀렉터/속성/그룹/주석 구분
+	 * @param {String} 스케치 문자열 한줄
+	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
-	sortAttribute : function() {
+	sortAttribute : function(strSketch) {
 		throw new Error("must override sortAttribute method");	
 	},
 
 	/**
 	 * (public)
-	 * getCss : 스케치에 필요한 알맞은 CSS를 스케치전용 CSS파일에서 읽어온다.
-	 * @return {미정} 미정
+	 * sortSketchComponent : 속성, 그룹, 정렬을 알맞은 셀렉터에 분류작업
+	 * @param {Array} 스케치 컴포넌트 객체 배열
+	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
-	getCss : function() {
+	sortSketchComponent : function(arrSektchComp) {
+		throw new Error("must override sortSketchComponent method");	
+	},
+
+	/**
+	 * (public)
+	 * applyCss : 분류된 셀렉터에 알맞은 CSS를 적용
+	 * @param {Array} 스케치 컴포넌트 객체 배열
+	 * @return {Array} 스케치 컴포넌트 객체 배열
+	 */
+	applyCss : function(arrSektchComp) {
 		throw new Error("must override getCss method");	
 	},
 
 	/**
 	 * (public)
-	 * rerendering : 스케치룰에 따라 재렌더링 하여 화면에 출력한다.
+	 * rerendering : 화면에 해당 순서대로 재배치
+	 * @param {Array} 스케치 컴포넌트 객체 배열
 	 */
-	rerendering : function() {
+	rerendering : function(arrSektchComp) {
 		throw new Error("must override rerendering method");	
 	}
 };
