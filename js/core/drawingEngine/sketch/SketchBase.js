@@ -19,7 +19,30 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype = new wedump.core.drawingE
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
 wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(strSketch) {
+	var strSketch = strSketch.replace(/(^\s*)|(\s*$)/g, ""); // trim 역할
+	var arrStrSketch = strSketch.split("\n");
 
+	for (var i = 0; i < arrStrSketch.length; i++) {
+		var line = arrStrSketch[i];
+
+		// 주석 제거
+		line = line.substring(0, line.indexOf("//")).replace(/(^\s*)|(\s*$)/g, "");
+
+		// 공백기준 분리
+		var arrStrComp = line.split(" ");
+		for (var j = 0; j < arrStrComp.length; j++) {
+			if (arrStrComp[j] !== "") {	
+			    // 컴포넌트 분류	
+				if (arrStrComp[j].substr(0, 1) === "(") { // 속성
+
+				} else if (arrStrComp[j].substr(0, 1) === "{") { // 그룹
+
+				} else { // 셀렉터
+
+				}
+			}
+		}
+	}
 };
 
 /**
@@ -46,6 +69,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSek
  * (public)
  * rerendering : 화면에 해당 순서대로 재배치
  * @param {Array} 스케치 컴포넌트 객체 배열
+ * @return {Array} 스케치 컴포넌트 객체 배열
  */
 wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSektchComp) {
 

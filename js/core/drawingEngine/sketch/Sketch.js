@@ -15,10 +15,10 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	 * draw : 스케치의 템플릿 메소드(알고리즘 골격)	 	 
 	 */
 	draw : function() {		
-		this.sortAttribute();
-		this.sortSketchComponent();
-		this.applyCss();
-		this.rerendering();
+		this.arrSketchComp = this.sortAttribute(this.strSketch);
+		this.arrSketchComp = this.sortSketchComponent(this.arrSketchComp);
+		this.arrSketchComp = this.applyCss(this.arrSketchComp);
+		this.arrSketchComp = this.rerendering(this.arrSketchComp);
 	},
 
 	/**
@@ -55,6 +55,7 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	 * (public)
 	 * rerendering : 화면에 해당 순서대로 재배치
 	 * @param {Array} 스케치 컴포넌트 객체 배열
+	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
 	rerendering : function(arrSektchComp) {
 		throw new Error("must override rerendering method");	
