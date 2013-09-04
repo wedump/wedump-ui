@@ -32,7 +32,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 		var arrStrComp = line.split(" ");
 		for (var j = 0; j < arrStrComp.length; j++) {
 			if (arrStrComp[j] !== "") {	
-			    // 컴포넌트 분류	
+				// 컴포넌트 분류	
 				if (arrStrComp[j].substr(0, 1) === "(") { // 속성
 
 				} else if (arrStrComp[j].substr(0, 1) === "{") { // 그룹
