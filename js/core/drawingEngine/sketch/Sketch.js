@@ -6,7 +6,7 @@ wedump.core.drawingEngine.sketch.Sketch = function(strSketch, arrSketchObj, comp
 	this.strSketch = strSketch; // 스케치 문자열
 	this.arrSketchObj = arrSketchObj; // 스케치 문자열과 매칭되는 스케치 객체 배열
 	this.component = component; // 컴포넌트 객체
-	this.arrSketchComp; // 스케치 컴포넌트 객체 배열
+	this.arrSketchComp = new Array(); // 스케치 컴포넌트 객체 배열
 };
 
 wedump.core.drawingEngine.sketch.Sketch.prototype = {
@@ -33,7 +33,7 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 
 	/**
 	 * (public)
-	 * sortSketchComponent : 속성, 그룹, 정렬을 알맞은 셀렉터에 분류작업
+	 * sortSketchComponent : 속성, 그룹을 알맞은 셀렉터에 분류작업
 	 * @param {Array} 스케치 컴포넌트 객체 배열
 	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
