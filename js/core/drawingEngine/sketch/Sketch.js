@@ -33,7 +33,7 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 
 	/**
 	 * (public)
-	 * sortSketchComponent : 속성, 그룹을 알맞은 셀렉터에 분류작업
+	 * sortSketchComponent : 속성, 그룹을 알맞은 셀렉터에 분류
 	 * @param {Array} 스케치 컴포넌트 객체 배열
 	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
