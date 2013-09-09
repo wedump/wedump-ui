@@ -41,7 +41,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 	for (var i = 0; i < arrStrComp.length; i++) {
 		if (arrStrComp[i] !== "") {	
 			// 컴포넌트 분류	
-			if (arrStrComp[i].substr(0, 1) === "(") { // 속성
+			if (arrStrComp[i].substr(0, 1) == "(") { // 속성
 				var sketchAttribute = new wedump.core.drawingEngine.sketch.SketchAttribute();
 				var arrSketchAttribute = arrStrComp[i].substring(1, arrStrComp[i].length - 1).split(" ");
 
@@ -52,7 +52,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 				}
 
 				arrSketchComp[arrSketchComp.length] = sketchAttribute;
-			} else if (arrStrComp[i].substr(0, 1) === "{") { // 그룹					
+			} else if (arrStrComp[i].substr(0, 1) == "{") { // 그룹					
 				var lastBraceIndex = arrStrComp[i].indexOf("}");
 				if (lastBraceIndex < 0) { // 닫기 중괄호가 있을 경우(그룹의 끝)
 					arrStrComp[i + 1] = "{" + arrStrComp[i + 1];
@@ -91,9 +91,12 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
 	if (typeof arrSektchComp == "undefined") return [];
 
 	var sketchPackage = wedump.core.drawingEngine.sketch;
+	var newArrSketchComp = new Array();
+	var index1 = 0;
 
 	for (var i = 0; i < arrSektchComp.length; i++) {
 		var sketchComp = arrSektchComp[i];
+		newArrSketchComp[index1++] = sketchComp;
 
 		if (sketchComp instanceof sketchPackage.SketchAttribute) { // 속성
 			if (arrSektchComp.length == 1) { // 속성만 있을 경우
@@ -111,9 +114,54 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
 				}
 			}
 		} else if (sketchComp instanceof Array) { // 그룹
+			var firstSketchGroup = new sketchPackage.SketchGroup();
+			var lastSketchGroup = new sketchPackage.SketchGroup();
+			firstSketchGroup.strName = "";
+			firstSketchGroup.order = firstSketchGroup.FIRST;
+			lastSketchGroup.strName = "";
+			lastSketchGroup.order = firstSketchGroup.LAST;
 
+			if (arrSketchComp[i + 1] instanceof sketchPackage.SketchAttribute) { // 오른쪽에 속성이 있을 경우
+				sketchComp[sketchComp.length] = arrSketchComp[i + 1];
+
+				for (var j = i + 1; j < arrSketchComp.length; j++) {
+					arrSketchComp[j] = arrSketchComp[j + 1];
+				}
+
+				arrSketchComp.pop();
+			}
+
+			var newSketchComp = new Array();
+			var index2 = 0;
+			for (var j = 0; j < sketchComp.length; j++) {
+				newSketchComp[index2++] = sketchComp[j];
+
+				if (sketchComp[j] instanceof sketchPackage.SketchAttribute) {
+					if (sketchComp[j].values[0].substr(0, 1) == ":") { // 그룹 속성
+						firstSketchGroup.addSketchAttribute(sketchComp[j]);						
+						newSketchComp.pop();
+						index2--;
+					}
+				}
+			}
+
+			sketchComp = this.sortSketchComponent(newSketchComp); // 재귀호출
+
+			for (var j = 0; j < sketchComp.length; j++) {
+				if (sketchComp[j] instanceof sketchPackage.SketchSelector) {
+					if (j == 0) { // 그룹의 시작					
+						sketchComp[j].sketchGroup = firstSketchGroup;					
+					} else if (j == sketchComp.length - 1) { // 그룹의 끝
+						sketchComp[j].sketchGroup = lastSketchGroup;
+					}
+				}
+
+				newArrSketchComp[index1++] = sketchComp[j];
+			}
 		}
 	}
+
+	return newArrSketchComp;
 };
 
 /**
