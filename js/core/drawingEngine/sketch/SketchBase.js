@@ -6,8 +6,8 @@ wedump.core.drawingEngine.sketch.SketchBase = function(strSketch, arrSketchObj) 
 	this.strSketch = strSketch; // 스케치 문자열
 	this.arrSketchObj = arrSketchObj; // 스케치 문자열과 매칭되는 스케치 객체 배열
 	this.arrSketchComp = new Array(); // 스케치 컴포넌트 객체 배열
-
-	this.draw();
+	
+	//this.draw();
 };
 
 wedump.core.drawingEngine.sketch.SketchBase.prototype = new wedump.core.drawingEngine.sketch.Sketch();
@@ -52,17 +52,18 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 				}
 
 				arrSketchComp[arrSketchComp.length] = sketchAttribute;
-			} else if (arrStrComp[i].substr(0, 1) == "{") { // 그룹					
+			} else if (arrStrComp[i].substr(0, 1) == "{") { // 그룹				
 				var lastBraceIndex = arrStrComp[i].indexOf("}");
-				if (lastBraceIndex < 0) { // 닫기 중괄호가 있을 경우(그룹의 끝)
+				if (lastBraceIndex < 0) {
 					arrStrComp[i + 1] = "{" + arrStrComp[i + 1];
 					groupComp += arrStrComp[i].replace("{", "") + " ";
-				} else {
-					groupComp += arrStrComp[i].replace("{", "").replace("}", "");
+				} else { // 닫기 중괄호가 있을 경우(그룹의 끝)
+					var lastWord = arrStrComp[i].replace("{", "").replace("}", "");
+					groupComp += lastWord.substring(0, lastWord.indexOf(":"));
 
 					var groupAttributeIndex = arrStrComp[i].indexOf(":", lastBraceIndex);
 					if (groupAttributeIndex > -1) { // 그룹속성을 포함하는 경우
-						groupComp += " (" + arrStrComp[i].substr(groupAttributeIndex) + ")"; // 그룹속성은 그룹의 마지막 열에 존재하며, 콜론(:) 으로 시작된다.
+						groupComp += " (" + arrStrComp[i].substr(groupAttributeIndex) + ")"; // 그룹속성은 그룹의 마지막 열에 존재하며, 콜론(:) 으로 시작된다.						
 					}
 
 					var arrSubSketchComp = this.sortAttribute(groupComp); // 재귀호출						
@@ -87,41 +88,42 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
  * @param {Array} 스케치 컴포넌트 객체 배열
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = function(arrSektchComp) {
-	if (typeof arrSektchComp == "undefined") return [];
+wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = function(arrSketchComp) {	
+	if (typeof arrSketchComp == "undefined") return [];
 
 	var sketchPackage = wedump.core.drawingEngine.sketch;
 	var newArrSketchComp = new Array();
-	var index1 = 0;
+	var index1 = 0;	
 
-	for (var i = 0; i < arrSektchComp.length; i++) {
-		var sketchComp = arrSektchComp[i];
+	for (var i = 0; i < arrSketchComp.length; i++) {
+		var sketchComp = arrSketchComp[i];
 		newArrSketchComp[index1++] = sketchComp;
 
 		if (sketchComp instanceof sketchPackage.SketchAttribute) { // 속성
-			if (arrSektchComp.length == 1) { // 속성만 있을 경우
-
+			if (arrSketchComp[i - 1] instanceof sketchPackage.SketchSelector) { // 왼쪽에 셀렉터가 있을 때
+				sketchComp.direction = "right";
+				arrSketchComp[i - 1].addSketchAttribute(sketchComp);
+			} else if (arrSketchComp[i + 1] instanceof sketchPackage.SketchSelector) { // 왼쪽이 없을 경우 오른쪽 셀렉터
+				sketchComp.direction = "left";
+				arrSketchComp[i + 1].addSketchAttribute(sketchComp);
+			} else if (arrSketchComp[i + 1] instanceof Array) { // 왼쪽이 없을 경우 오른쪽 그룹
+				sketchComp.direction = "left";
+				sketchComp.values[0] = ":" + sketchComp.values[0];
+				arrSketchComp[i + 1][arrSketchComp[i + 1].length] = sketchComp;
 			} else {
-				if (arrSektchComp[i - 1] instanceof sketchPackage.SketchSelector) { // 왼쪽에 셀렉터가 있을 때
-					sketchComp.direction = "right";
-					arrSektchComp[i - 1].addSketchAttribute(sketchComp);
-				} else if (arrSektchComp[i + 1] instanceof sketchPackage.SketchSelector) { // 왼쪽이 없을 경우 오른쪽 셀렉터
-					sketchComp.direction = "left";
-					arrSektchComp[i + 1].addSketchAttribute(sketchComp);
-				} else if (arrSektchComp[i + 1] instanceof Array) { // 왼쪽이 없을 경우 오른쪽 그룹
-					sketchComp.direction = "left";
-					arrSektchComp[i + 1][arrSektchComp[i + 1].length] = sketchComp;
-				}
+				continue;
 			}
+			index1--;
+			newArrSketchComp.pop();
 		} else if (sketchComp instanceof Array) { // 그룹
 			var firstSketchGroup = new sketchPackage.SketchGroup();
-			var lastSketchGroup = new sketchPackage.SketchGroup();
-			firstSketchGroup.strName = "";
-			firstSketchGroup.order = firstSketchGroup.FIRST;
-			lastSketchGroup.strName = "";
+			var lastSketchGroup = new sketchPackage.SketchGroup();			
+			firstSketchGroup.order = firstSketchGroup.FIRST;			
 			lastSketchGroup.order = firstSketchGroup.LAST;
 
 			if (arrSketchComp[i + 1] instanceof sketchPackage.SketchAttribute) { // 오른쪽에 속성이 있을 경우
+				arrSketchComp[i + 1].direction = "right";
+				arrSketchComp[i + 1].values[0] = ":" + arrSketchComp[i + 1].values[0];
 				sketchComp[sketchComp.length] = arrSketchComp[i + 1];
 
 				for (var j = i + 1; j < arrSketchComp.length; j++) {
@@ -150,7 +152,8 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
 			for (var j = 0; j < sketchComp.length; j++) {
 				if (sketchComp[j] instanceof sketchPackage.SketchSelector) {
 					if (j == 0) { // 그룹의 시작					
-						sketchComp[j].sketchGroup = firstSketchGroup;					
+						sketchComp[j].sketchGroup = firstSketchGroup;
+						index1--;
 					} else if (j == sketchComp.length - 1) { // 그룹의 끝
 						sketchComp[j].sketchGroup = lastSketchGroup;
 					}
@@ -170,7 +173,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
  * @param {Array} 스케치 컴포넌트 객체 배열
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSektchComp) {
+wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSketchComp) {
 
 };
 
@@ -180,6 +183,6 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSek
  * @param {Array} 스케치 컴포넌트 객체 배열
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSektchComp) {
+wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp) {
 
 };
