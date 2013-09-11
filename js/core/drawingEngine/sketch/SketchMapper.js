@@ -2,9 +2,7 @@
  * SketchMapper : 스케치 속성의 CSS를 얻어오기 위한 Mapper
  * @type {Implementation Class}
  */
-wedump.core.drawingEngine.sketch.SketchMapper = function() {
-	this.patterns = new Array(); // sketchCssPattern.txt에 있는 패턴 값 배열
-};
+wedump.core.drawingEngine.sketch.SketchMapper = function() {};
 
 wedump.core.drawingEngine.sketch.SketchMapper.prototype = {
 	/**
@@ -14,6 +12,18 @@ wedump.core.drawingEngine.sketch.SketchMapper.prototype = {
 	 * @return {String} 대응식
 	 */
 	map : function(strAttrPattern) {
+		var sketchCssPattern = new wedump.core.drawingEngine.sketch.SketchCssPattern();
+		var arrPattern = sketchCssPattern.getPatterns();
 
+		for (var i = 0; i < arrPattern.length; i++) {
+			var regExp = eval(arrPattern[i].regExp);
+			var correspond = arrPattern[i].correspond;
+
+			if (regExp.test(strAttrPattern)) {
+				return correspond;
+			}
+		}
+
+		return "";
 	}
 };

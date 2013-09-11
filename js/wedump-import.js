@@ -11,6 +11,7 @@ document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchAttribute.js"></script>');
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchGroup.js"></script>');
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchSelector.js"></script>');
+document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchCssPattern.js"></script>');
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchMapper.js"></script>');
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/Sketch.js"></script>');
 document.write('<script type="text/javascript" src="wedump/js/core/drawingEngine/sketch/SketchBase.js"></script>');
