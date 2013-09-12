@@ -5,7 +5,7 @@
 wedump.core.drawingEngine.sketch.SketchGroup = function() {
 	// order에 들어갈 상수값
 	this.FIRST = "FIRST";
-	this.LAST = "LAST";
+	this.LAST  = "LAST";
 	
 	this.order; // 그룹내에서 이 객체의 순번
 	this.sketchAttributes = new Array(); // 스체키 컴포넌트 중 속성의 배열
@@ -27,6 +27,21 @@ wedump.core.drawingEngine.sketch.SketchGroup.prototype = {
 	 * @return {String} 그룹의 innerHTML 문자열
 	 */
 	getInnerHtml : function() {
+		var html  = "";
+		var style = "";
 
+		if (this.order == this.FIRST) {
+			html += "<span ";
+
+			for (var i = 0; i < this.sketchAttributes.length; i++) {
+				style += this.sketchAttributes[i].getCss();
+			}
+
+			html += " style='" + style + "'>";
+		} else if (this.order == this.LAST) {
+			html += "</span>";
+		}
+
+		return html;
 	}
 };

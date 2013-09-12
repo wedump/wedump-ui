@@ -43,12 +43,12 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 
 	/**
 	 * (public)
-	 * applyCss : 분류된 셀렉터에 알맞은 CSS를 적용
+	 * applyCss : 분류된 속성에 알맞은 CSS패턴을 적용
 	 * @param {Array} 스케치 컴포넌트 객체 배열
 	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
-	applyCss : function(arrSektchComp) {
-		throw new Error("must override getCss method");	
+	applyCssPattern : function(arrSektchComp) {
+		throw new Error("must override applyCssPattern method");	
 	},
 
 	/**

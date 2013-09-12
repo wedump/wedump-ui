@@ -140,6 +140,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
 
 				if (sketchComp[j] instanceof sketchPackage.SketchAttribute) {
 					if (sketchComp[j].values[0].substr(0, 1) == ":") { // 그룹 속성
+						sketchComp[j].values[0] = sketchComp[j].values[0].substr(1);
 						firstSketchGroup.addSketchAttribute(sketchComp[j]);						
 						newSketchComp.pop();
 						index2--;
@@ -169,12 +170,35 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortSketchComponent = func
 
 /**
  * (public)
- * applyCss : 분류된 셀렉터에 알맞은 CSS를 적용
+ * applyCss : 분류된 속성에 알맞은 CSS패턴을 적용
  * @param {Array} 스케치 컴포넌트 객체 배열
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSketchComp) {
+wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function(arrSketchComp) {
+	var sketchPackage = wedump.core.drawingEngine.sketch;
+	var mapper = new sketchPackage.SketchMapper();
 
+	// 속성을 찾아서 pattern 변수에 값을 채워줌	
+	for (var i = 0; i < arrSketchComp.length; i++) {
+		if (arrSketchComp[i] instanceof sketchPackage.SketchSelector) {
+			var sketchAttributes  = arrSketchComp[i].sketchAttributes; // 셀렉터 -> 속성
+			var gSketchAttributes = [];
+			
+			if (arrSketchComp[i].sketchGroup instanceof sketchPackage.SketchGroup) {
+				gSketchAttributes = arrSketchComp[i].sketchGroup.sketchAttributes; // 셀렉터 -> 그룹 -> 속성
+			}
+			
+			for (var j = 0; j < sketchAttributes.length; j++) {				
+				sketchAttributes[j].pattern = mapper.map(sketchAttributes[j].values[0]); // 해당속성에 맞는 CSS대응식 추출
+			}
+
+			for (var j = 0; j < gSketchAttributes.length; j++) {				
+				gSketchAttributes[j].pattern = mapper.map(gSketchAttributes[j].values[0]);
+			}
+		}
+	}
+
+	return arrSketchComp;
 };
 
 /**
@@ -184,5 +208,5 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCss = function(arrSke
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
 wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp) {
-
+	// *** display가 block일때 처리하기 ***
 };
