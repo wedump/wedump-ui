@@ -14,12 +14,34 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	 * (public)
 	 * draw : 스케치의 템플릿 메소드(알고리즘 골격)	 	 
 	 */
-	draw : function() {		
-		this.arrSketchComp = this.sortAttribute(this.strSketch);
-		this.arrSketchComp = this.sortSketchComponent(this.arrSketchComp);
-		this.arrSketchComp = this.applyCss(this.arrSketchComp);
-		this.arrSketchComp = this.rerendering(this.arrSketchComp);
-	},
+	draw : function() {
+		// 알고리즘 골격 함수 정의
+		var algoFuntion = function(arrStrSketch, target) {
+			var lineSketchComp;
+
+			for (var i = 0; i < arrStrSketch.length; i++) {
+				lineSketchComp = this.sortAttribute(arrStrSketch[i]);
+				lineSketchComp = this.sortSketchComponent(lineSketchComp);
+				lineSketchComp = this.applyCssPattern(lineSketchComp);
+
+				this.arrSketchComp[i] = lineSketchComp;
+			}
+
+			this.arrSketchComp = this.rerendering(this.arrSketchComp);
+		};
+
+		// 파라미터 종류에 따른 처리
+		if (typeof this.strSketch == "string") { // 문자열일 때			
+			algoFuntion(this.strSketch.split("\n"), "body");
+
+		} else if (typeof this.strSketch == "object") { // JSON일 때
+			for (var key in this.strSketch) {
+				var value = this.strSketch[key];
+
+				algoFuntion(value.split("\n"), key);
+			}
+		}
+	},	
 
 	/**
 	 * (public)
@@ -55,9 +77,10 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	 * (public)
 	 * rerendering : 화면에 해당 순서대로 재배치
 	 * @param {Array} 스케치 컴포넌트 객체 배열
+	 * @param {String} 재렌더링 될 영역 셀렉터
 	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
-	rerendering : function(arrSektchComp) {
-		throw new Error("must override rerendering method");	
+	rerendering : function(arrSektchComp, target) {
+		throw new Error("must override rerendering method");
 	}
 };

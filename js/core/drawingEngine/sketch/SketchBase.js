@@ -205,8 +205,51 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function
  * (public)
  * rerendering : 화면에 해당 순서대로 재배치
  * @param {Array} 스케치 컴포넌트 객체 배열
+ * @param {String} 재렌더링 될 영역 셀렉터
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp) {
-	// *** display가 block일때 처리하기 ***
+wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp, target) {
+	// 한 행에 셀렉터 한개만 있을 경우가 아니면, display가 block인 셀렉터는 inline-block으로 변경해야 함    
+    var sketchPackage = wedump.core.drawingEngine.sketch;
+    var allHtml  = jQuery(target).html();
+    var nAllHtml = "";
+
+    for (var i = 0; i < arrSketchComp.length; i++) {
+    	var lineSketchComp = arrSketchComp[i];
+    	
+    	for (var j = 0; j < lineSketchComp.length; j++) {    		
+    		var nLineHtml = "";
+
+    		// 예외처리
+    		if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) {
+    			// 한 행에 속성만 있는 경우
+    			if (i == 0) { // 첫 행이면 위가 없으므로 아래쪽으로 배치
+
+    			} else { // 위쪽으로 배치
+
+    			}
+	    	} else if (lineSketchComp.length > 1 &&
+	    			   jQuery(lineSketchComp[j].strName).css("display") == "block") {
+	    		// 한 행에 셀렉터가 한 개만 있는 경우가 아니면, display가 block인 셀렉터는 inline-block으로 변경
+	    		jQuery(lineSketchComp[j].strName).css("display", "inline-block");
+	    	}
+	    	
+	    	allHtml   = allHtml.replace(jQuery(lineSketchComp[j].strName).html(), "");
+	    	nLineHtml = lineSketchComp[j].getInnerHtml();
+
+	    	// 한 행은 하나의 div로 감싼다
+	    	if (j == 0) {
+	    		nLineHtml = "<div>" + nLineHtml;
+	    	} else if (j == lineSketchComp.length - 1) {
+	    		nLineHtml = nLineHtml + "</div>";
+	    	}
+
+	    	nAllHtml += nLineHtml + "\n";
+    	}    	
+    }
+
+    // 남은 태그 붙임
+    nAllHtml += allHtml;
+
+    jQuery(target).html(nAllHtml);
 };
