@@ -2,7 +2,7 @@
  * Sketch : 화면 스케치의 알고리즘 인터페이스를 제공
  * @type {Abstract Class}
  */
-wedump.core.drawingEngine.sketch.Sketch = function(strSketch, arrSketchObj, component) {	
+wedump.core.drawingEngine.sketch.Sketch = function(strSketch, arrSketchObj, component) {
 	this.strSketch = strSketch; // 스케치 문자열
 	this.arrSketchObj = arrSketchObj; // 스케치 문자열과 매칭되는 스케치 객체 배열
 	this.component = component; // 컴포넌트 객체
@@ -13,21 +13,22 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	/**
 	 * (public)
 	 * draw : 스케치의 템플릿 메소드(알고리즘 골격)	 	 
-	 */
-	draw : function() {
+	 */	
+	draw : function() {		
 		// 알고리즘 골격 함수 정의
-		var algoFuntion = function(arrStrSketch, target) {
-			var lineSketchComp;
+		var sketch = this;
+		var algoFuntion = function(arrStrSketch, target) {			
+			var lineSketchComp;			
 
-			for (var i = 0; i < arrStrSketch.length; i++) {
-				lineSketchComp = this.sortAttribute(arrStrSketch[i]);
-				lineSketchComp = this.sortSketchComponent(lineSketchComp);
-				lineSketchComp = this.applyCssPattern(lineSketchComp);
+			for (var i = 0; i < arrStrSketch.length; i++) {				
+				lineSketchComp = sketch.sortAttribute(arrStrSketch[i]);
+				lineSketchComp = sketch.sortSketchComponent(lineSketchComp);
+				lineSketchComp = sketch.applyCssPattern(lineSketchComp);
 
-				this.arrSketchComp[i] = lineSketchComp;
+				sketch.arrSketchComp[i] = lineSketchComp;
 			}
-
-			this.arrSketchComp = this.rerendering(this.arrSketchComp);
+			
+			sketch.arrSketchComp = sketch.rerendering(sketch.arrSketchComp, target);
 		};
 
 		// 파라미터 종류에 따른 처리

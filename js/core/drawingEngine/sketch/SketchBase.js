@@ -2,12 +2,10 @@
  * SketchBase : 공통으로 사용되는 레이아웃 스케치를 제공
  * @type {Implementation Class}
  */
-wedump.core.drawingEngine.sketch.SketchBase = function(strSketch, arrSketchObj) {	
+wedump.core.drawingEngine.sketch.SketchBase = function(strSketch, arrSketchObj) {
 	this.strSketch = strSketch; // 스케치 문자열
 	this.arrSketchObj = arrSketchObj; // 스케치 문자열과 매칭되는 스케치 객체 배열
 	this.arrSketchComp = new Array(); // 스케치 컴포넌트 객체 배열
-	
-	//this.draw();
 };
 
 wedump.core.drawingEngine.sketch.SketchBase.prototype = new wedump.core.drawingEngine.sketch.Sketch();
@@ -208,38 +206,46 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function
  * @param {String} 재렌더링 될 영역 셀렉터
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp, target) {
-	// 한 행에 셀렉터 한개만 있을 경우가 아니면, display가 block인 셀렉터는 inline-block으로 변경해야 함    
+wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp, target) {	
     var sketchPackage = wedump.core.drawingEngine.sketch;
     var allHtml  = jQuery(target).html();
-    var nAllHtml = "";
+    var nAllHtml = "";    
 
-    for (var i = 0; i < arrSketchComp.length; i++) {
+    for (var i = 0; i < arrSketchComp.length; i++) {    	
     	var lineSketchComp = arrSketchComp[i];
     	
     	for (var j = 0; j < lineSketchComp.length; j++) {    		
     		var nLineHtml = "";
+    		var attrStyle = "";
 
     		// 예외처리
-    		if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) {
+	    	if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) {
     			// 한 행에 속성만 있는 경우
-    			if (i == 0) { // 첫 행이면 위가 없으므로 아래쪽으로 배치
-
-    			} else { // 위쪽으로 배치
-
+    			if (i == 0) { // 첫 행이면 위가 없으므로 아래쪽으로 마진
+    				lineSketchComp[0].direction = "bottom";
+    			} else { // 위쪽으로 마진
+    				lineSketchComp[0].direction = "top";
     			}
-	    	} else if (lineSketchComp.length > 1 &&
-	    			   jQuery(lineSketchComp[j].strName).css("display") == "block") {
-	    		// 한 행에 셀렉터가 한 개만 있는 경우가 아니면, display가 block인 셀렉터는 inline-block으로 변경
-	    		jQuery(lineSketchComp[j].strName).css("display", "inline-block");
+
+    			attrStyle = lineSketchComp[0].getCss();
+	    	} else {
+	    		var delHtml = jQuery(lineSketchComp[j].strName).wrap("<span></span>").parent().html();
+		    	allHtml = String(allHtml).replace(delHtml, "");
+
+		    	// 한 행에 셀렉터가 한 개만 있는 경우가 아니면,
+		    	// display가 block인 셀렉터는 inline-block으로 변경
+		    	if (lineSketchComp.length > 1 &&
+					jQuery(lineSketchComp[j].strName).css("display") == "block") {
+
+		    		jQuery(lineSketchComp[j].strName).css("display", "inline-block");
+		    	}
+
+		    	nLineHtml = lineSketchComp[j].getInnerHtml();
 	    	}
-	    	
-	    	allHtml   = allHtml.replace(jQuery(lineSketchComp[j].strName).html(), "");
-	    	nLineHtml = lineSketchComp[j].getInnerHtml();
 
 	    	// 한 행은 하나의 div로 감싼다
 	    	if (j == 0) {
-	    		nLineHtml = "<div>" + nLineHtml;
+	    		nLineHtml = "<div style='" + attrStyle + "'>" + nLineHtml;
 	    	} else if (j == lineSketchComp.length - 1) {
 	    		nLineHtml = nLineHtml + "</div>";
 	    	}
@@ -252,4 +258,6 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
     nAllHtml += allHtml;
 
     jQuery(target).html(nAllHtml);
+
+    return arrSketchComp;
 };

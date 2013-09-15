@@ -38,9 +38,11 @@ wedump.core.Wedump.prototype = {
 				break;
 			case 1: // 파라미터가 1개 이상일 때, 스케치 객체를 생성하여 드로잉하고 스케치 객체 반환
 				this.sketch = new wedump.core.drawingEngine.sketch.SketchBase(arg[0]);
+				this.sketch.draw();
 				return this.sketch;				
 			case 2:
 				this.sketch = new wedump.core.drawingEngine.sketch.SketchBase(arg[0], arg[1]);
+				this.sketch.draw();
 				return this.sketch;				
 			default:
 				throw new TypeError("undefined is not a function");
