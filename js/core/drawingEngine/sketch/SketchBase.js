@@ -295,7 +295,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
 	    			sketchAttribute.values[0] = width;
 	    			sketchAttribute.pattern = mapper.map(sketchAttribute.values[0]);
 	    		}
-	    		debugger;
+	    		
 	    		if (jQuery(selector)[0].style.width == "") {
 	    			
 	    			lineSketchComp[j].addSketchAttribute(sketchAttribute);
