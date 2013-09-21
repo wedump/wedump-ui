@@ -10,9 +10,10 @@ wedump.core.drawingEngine.sketch.SketchCssPattern = function() {
 	// 대응변수는 &로 시작하며, 들어오는 파라미터가 순차적으로 대입됨
 	// 대응변수에 영문 또는 영문과 숫자의 조합
 	this.patterns =
-	"															  \n\
-	margin		;; /^[0-9]+(px)$/	;; margin-&direction: &value; \n\
-	text-aligin ;; /^(left|right)$/ ;; text-align: &value;		  \n\
+	"															  	   \n\
+	margin		;; /^[0-9]+(px)$/		 ;; margin-&direction: &value; \n\
+	text-aligin ;; /^(left|right)$/		 ;; text-align: &value;		   \n\
+	width		;; /^[0-9]+(.[0-9]+)?%$/ ;; width: &value;			   \n\
 	";
 };
 

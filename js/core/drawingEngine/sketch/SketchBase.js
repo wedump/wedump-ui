@@ -193,6 +193,8 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function
 			for (var j = 0; j < gSketchAttributes.length; j++) {				
 				gSketchAttributes[j].pattern = mapper.map(gSketchAttributes[j].values[0]);
 			}
+		} else if (arrSketchComp[i] instanceof sketchPackage.SketchAttribute) {
+			arrSketchComp[i].pattern = mapper.map(arrSketchComp[i].values[0]);
 		}
 	}
 
@@ -214,9 +216,10 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
     for (var i = 0; i < arrSketchComp.length; i++) {    	
     	var lineSketchComp = arrSketchComp[i];
     	
-    	for (var j = 0; j < lineSketchComp.length; j++) {    		
+    	for (var j = 0; j < lineSketchComp.length; j++) {
     		var nLineHtml = "";
     		var attrStyle = "";
+    		var sketchAttribute;
 
     		// 예외처리
 	    	if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) {
@@ -229,16 +232,74 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
 
     			attrStyle = lineSketchComp[0].getCss();
 	    	} else {
-	    		var delHtml = jQuery(lineSketchComp[j].strName).wrap("<span></span>").parent().html();
+	    		var selector = lineSketchComp[j].strName;
+	    		var delHtml = jQuery(selector).wrap("<span></span>").parent().html();
 		    	allHtml = String(allHtml).replace(delHtml, "");
 
 		    	// 한 행에 셀렉터가 한 개만 있는 경우가 아니면,
 		    	// display가 block인 셀렉터는 inline-block으로 변경
 		    	if (lineSketchComp.length > 1 &&
-					jQuery(lineSketchComp[j].strName).css("display") == "block") {
+					jQuery(selector).css("display") == "block") {
+		    			
+		    		jQuery(selector).css("display", "inline-block");
 
-		    		jQuery(lineSketchComp[j].strName).css("display", "inline-block");
+		    		if (j != lineSketchComp.length - 1) {
+		    			jQuery(selector).css("float", "left");
+		    		}
 		    	}
+		    	
+		    	// 넓이 분배
+		    	if (j == 0) {
+			    	var per100Width = 0;
+	    			var totWidth = 0;
+	    			var freeWidth = 0;
+	    			var cnt = 0;
+
+	    			for (var k = 0; k < lineSketchComp.length; k++) {
+	    				var selector2 = lineSketchComp[k].strName;
+	    				if (k == 0) {
+	    					per100Width = Number(jQuery(selector2).wrap("<div></div>").parent().css("width").replace("px", ""));
+	    					jQuery(selector2).unwrap("<div></div>");
+	    				}
+	    				
+	    				var borderWidth = Number(jQuery(selector2).css("border").split(" ")[0].replace("px", ""));
+	    				var bodyWidth = Number(jQuery(selector2)[0].style.width.replace("px", ""));
+
+						var attrWidth = 0;
+						var sketchAttributes = lineSketchComp[k].sketchAttributes;						
+	    				for (var l = 0; l < sketchAttributes.length; l++) {
+	    					var index = sketchAttributes[l].values[0].indexOf("px");
+
+	    					if (index > -1) {
+	    						attrWidth += Number(sketchAttributes[l].values[0].substring(0, index));
+	    					}
+	    				}
+
+	    				totWidth += attrWidth + bodyWidth + borderWidth * 2;
+
+						if (bodyWidth == 0) {
+	    					cnt++;
+	    				}
+	    			}
+
+	    			freeWidth = per100Width - totWidth;
+
+	    			var width = Math.floor(
+	    							( ( freeWidth / per100Width ) * 100 ) / cnt    									
+	    						* 100) / 100 + "%";
+
+	    			
+	    			var mapper = new sketchPackage.SketchMapper();
+	    			sketchAttribute = new sketchPackage.SketchAttribute();
+
+	    			sketchAttribute.values[0] = width;
+	    			sketchAttribute.pattern = mapper.map(sketchAttribute.values[0]);
+	    		}
+	    		debugger;
+	    		if (jQuery(selector)[0].style.width == "") {
+	    			
+	    			lineSketchComp[j].addSketchAttribute(sketchAttribute);
+	    		}
 
 		    	nLineHtml = lineSketchComp[j].getInnerHtml();
 	    	}
@@ -246,7 +307,8 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
 	    	// 한 행은 하나의 div로 감싼다
 	    	if (j == 0) {
 	    		nLineHtml = "<div style='" + attrStyle + "'>" + nLineHtml;
-	    	} else if (j == lineSketchComp.length - 1) {
+	    	}
+	    	if (j == lineSketchComp.length - 1) {
 	    		nLineHtml = nLineHtml + "</div>";
 	    	}
 

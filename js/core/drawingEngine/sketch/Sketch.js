@@ -20,14 +20,14 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 		var algoFuntion = function(arrStrSketch, target) {			
 			var lineSketchComp;			
 
-			for (var i = 0; i < arrStrSketch.length; i++) {				
+			for (var i = 0; i < arrStrSketch.length; i++) {
 				lineSketchComp = sketch.sortAttribute(arrStrSketch[i]);
 				lineSketchComp = sketch.sortSketchComponent(lineSketchComp);
 				lineSketchComp = sketch.applyCssPattern(lineSketchComp);
 
-				sketch.arrSketchComp[i] = lineSketchComp;
+				sketch.arrSketchComp[i] = lineSketchComp;				
 			}
-			
+
 			sketch.arrSketchComp = sketch.rerendering(sketch.arrSketchComp, target);
 		};
 
