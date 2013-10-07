@@ -31,15 +31,15 @@ wedump.core.drawingEngine.sketch.SketchGroup.prototype = {
 		var style = "";
 
 		if (this.order == this.FIRST) {
-			html += "<span ";
+			html += "<div ";
 
 			for (var i = 0; i < this.sketchAttributes.length; i++) {
 				style += this.sketchAttributes[i].getCss();
 			}
 
-			html += " style='" + style + "'>";
+			html += " style='display: inline-block; " + style + "'>";
 		} else if (this.order == this.LAST) {
-			html += "</span>";
+			html += "</div>";
 		}
 
 		return html;

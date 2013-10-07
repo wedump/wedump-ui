@@ -12,7 +12,7 @@ wedump.core.drawingEngine.sketch.SketchCssPattern = function() {
 	this.patterns =
 	"															  	   \n\
 	margin		;; /^[0-9]+(px)$/		 ;; margin-&direction: &value; \n\
-	text-aligin ;; /^(left|right)$/		 ;; text-align: &value;		   \n\
+	float		;; /^(left|right)$/		 ;; float: &value;		       \n\
 	width		;; /^[0-9]+(.[0-9]+)?%$/ ;; width: &value;			   \n\
 	";
 };

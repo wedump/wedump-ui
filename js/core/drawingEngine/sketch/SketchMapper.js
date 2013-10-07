@@ -24,6 +24,6 @@ wedump.core.drawingEngine.sketch.SketchMapper.prototype = {
 			}
 		}
 
-		return "";
+		throw new Error("No mapping CSS pattern");
 	}
 };

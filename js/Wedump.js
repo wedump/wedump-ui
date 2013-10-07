@@ -4,7 +4,7 @@
  */
 wedump.core.Wedump = function() {
 	this.parser;
-	this.sketch;
+	this.arrSketch = new Array();
 	this.detailControl = new wedump.core.drawingEngine.detail.DetailControl();
 };
 
@@ -30,23 +30,31 @@ wedump.core.Wedump.prototype = {
 
 		switch (arg.length) {
 			case 0: // 파라미터가 0개일 때, 스케치 문자열 반환
-				if (typeof this.sketch == "undefined") {
-					return "";
-				} else {
-					return this.sketch.strSketch;
+				var arrStrSketch = new Array();
+
+				for (var i = 0; i < this.arrSketch.length; i++) {
+					arrStrSketch[arrStrSketch.length] = this.arrSketch[i].strSketch;
 				}
+
+				return arrStrSketch;
+			case 1: // 파라미터가 1개 이상일 때, 스케치 객체를 생성하여 드로잉하고 스케치 객체 반환			
+				this.arrSketch[this.arrSketch.length] = new wedump.core.drawingEngine.sketch.SketchBase(arg[0]);
 				break;
-			case 1: // 파라미터가 1개 이상일 때, 스케치 객체를 생성하여 드로잉하고 스케치 객체 반환
-				this.sketch = new wedump.core.drawingEngine.sketch.SketchBase(arg[0]);
-				this.sketch.draw();
-				return this.sketch;				
 			case 2:
-				this.sketch = new wedump.core.drawingEngine.sketch.SketchBase(arg[0], arg[1]);
-				this.sketch.draw();
-				return this.sketch;				
+				this.arrSketch[this.arrSketch.length] = new wedump.core.drawingEngine.sketch.SketchBase(arg[0], arg[1]);
+				break;
 			default:
 				throw new TypeError("undefined is not a function");
 		}
+
+		var sketchComp = this.arrSketch[this.arrSketch.length - 1];
+
+		// 화면 리사이즈 시 넓이배분을 다시 하기 위해 이벤트 설정
+		jQuery(window).bind("resize", function(e) {
+			sketchComp.draw();
+		}).trigger("resize");
+		
+		return sketchComp;
 	},
 
 	/**

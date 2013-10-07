@@ -52,16 +52,30 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 				arrSketchComp[arrSketchComp.length] = sketchAttribute;
 			} else if (arrStrComp[i].substr(0, 1) == "{") { // 그룹				
 				var lastBraceIndex = arrStrComp[i].indexOf("}");
+
 				if (lastBraceIndex < 0) {
 					arrStrComp[i + 1] = "{" + arrStrComp[i + 1];
 					groupComp += arrStrComp[i].replace("{", "") + " ";
 				} else { // 닫기 중괄호가 있을 경우(그룹의 끝)
 					var lastWord = arrStrComp[i].replace("{", "").replace("}", "");
-					groupComp += lastWord.substring(0, lastWord.indexOf(":"));
-
 					var groupAttributeIndex = arrStrComp[i].indexOf(":", lastBraceIndex);
+
 					if (groupAttributeIndex > -1) { // 그룹속성을 포함하는 경우
-						groupComp += " (" + arrStrComp[i].substr(groupAttributeIndex) + ")"; // 그룹속성은 그룹의 마지막 열에 존재하며, 콜론(:) 으로 시작된다.						
+						groupComp += lastWord.substring(0, lastWord.indexOf(":"));
+
+						if (arrStrComp[i].substr(groupAttributeIndex) == ":right") { // 예외처리(그룹의 오른쪽 정렬을 위한)
+							if ( i == arrStrComp.length - 1 ||
+							    (i == arrStrComp.length - 2 && arrStrComp[i + 1].substr(0, 1) == "(") ) {
+								groupComp += " (:right)";
+							} else {
+								groupComp += " (:left)";
+							}
+						} else {
+							groupComp += " (" + arrStrComp[i].substr(groupAttributeIndex) + ")"; // 그룹속성은 그룹의 마지막 열에 존재하며, 콜론(:) 으로 시작된다.	
+						}												
+					} else {
+						groupComp += lastWord;
+						groupComp += " (:left)"; // 디폴트
 					}
 
 					var arrSubSketchComp = this.sortAttribute(groupComp); // 재귀호출						
@@ -69,6 +83,10 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.sortAttribute = function(s
 					arrSketchComp[arrSketchComp.length] = arrSubSketchComp;
 				}					
 			} else { // 셀렉터
+				if (jQuery(arrStrComp[i]).length == 0) {
+					throw new Error("Not found sketch selector");
+				}
+
 				var sketchSelector = new wedump.core.drawingEngine.sketch.SketchSelector();
 				sketchSelector.strName = arrStrComp[i];
 
@@ -203,12 +221,104 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function
 
 /**
  * (public)
+ * divisionWidth : 각 셀렉터들에 알맞은 넓이를 분배
+ * @param {Array} 스케치 컴포넌트 객체 배열 
+ * @return {Array} 스케치 컴포넌트 객체 배열
+ */
+wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(arrSketchComp) {
+	if (arrSketchComp.length == 1) return arrSketchComp;
+
+	var sketchPackage = wedump.core.drawingEngine.sketch;
+	var mapper = new sketchPackage.SketchMapper();	
+
+	for (var i = 0; i < arrSketchComp.length; i++) {
+		var sketchAttribute;
+		var selector = arrSketchComp[i].strName;
+		var inlineYn = jQuery(selector).css("display") == "inline";
+
+		jQuery(selector).css("display", "inline-block");
+
+		if (i != arrSketchComp.length - 1) {
+			jQuery(selector).css("float", "left");
+		}
+		
+		// 넓이 분배		    	
+		if (i == 0) {
+	    	var per100Width = 0; // 현재화면 100%의 width(px)
+			var totWidth = 0; // 존재하는 컴포넌트의 width 합
+			var freeWidth = 0; // 남은 공간
+			var cnt = 0;
+
+			for (var k = 0; k < arrSketchComp.length; k++) {
+				var selector2 = arrSketchComp[k].strName;
+
+				if (k == 0) {
+					per100Width = Number(jQuery(selector2).wrap("<div></div>").parent().css("width").replace("px", ""));
+					jQuery(selector2).unwrap("<div></div>");
+				}
+				
+				var borderWidth = Number(jQuery(selector2)[0].style.border.split(" ")[0].replace("px", ""));
+				var bodyWidth = Number(jQuery(selector2)[0].style.width.replace("px", ""));
+
+				var attrWidth = 0; // 속성 width
+				var sketchAttributes = arrSketchComp[k].sketchAttributes;				
+				var gSketchAttributes = new Array();
+
+				if (arrSketchComp[k].sketchGroup instanceof sketchPackage.SketchGroup) {
+					gSketchAttributes = arrSketchComp[k].sketchGroup.sketchAttributes;					
+				}
+
+				for (var l = 0; l < sketchAttributes.length; l++) { // 셀렉터 속성
+					var index = sketchAttributes[l].values[0].indexOf("px");
+
+					if (index > -1) {
+						attrWidth += Number(sketchAttributes[l].values[0].substring(0, index));
+					}
+				}
+
+				for (var l = 0; l < gSketchAttributes.length; l++) { // 그룹 속성
+					var index = gSketchAttributes[l].values[0].indexOf("px");
+
+					if (index > -1) {
+						attrWidth += Number(gSketchAttributes[l].values[0].substring(0, index));
+					}
+				}
+
+				totWidth += attrWidth + bodyWidth + borderWidth * 2;
+
+				if (bodyWidth == 0) {
+					cnt++;
+				}
+			}
+
+			freeWidth = per100Width - totWidth;
+
+			var width = Math.floor(freeWidth / cnt * 100) / 100 + "px";
+			
+			sketchAttribute = new sketchPackage.SketchAttribute();
+
+			sketchAttribute.values[0] = width;
+			sketchAttribute.pattern = mapper.map("0%"); // css속성 width 매핑
+		}
+
+		if (!inlineYn) {
+			if (jQuery(selector)[0].style.width == "") {
+				arrSketchComp[i].addSketchAttribute(sketchAttribute);
+			}
+		}
+	}
+
+	return arrSketchComp;
+};
+
+/**
+ * (public)
  * rerendering : 화면에 해당 순서대로 재배치
  * @param {Array} 스케치 컴포넌트 객체 배열
  * @param {String} 재렌더링 될 영역 셀렉터
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp, target) {	
+wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arrSketchComp, target) {
     var sketchPackage = wedump.core.drawingEngine.sketch;
     var allHtml  = jQuery(target).html();
     var nAllHtml = "";    
@@ -218,11 +328,9 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
     	
     	for (var j = 0; j < lineSketchComp.length; j++) {
     		var nLineHtml = "";
-    		var attrStyle = "";
-    		var sketchAttribute;
-
-    		// 예외처리
-	    	if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) {
+    		var attrStyle = "";    		
+    		
+	    	if (lineSketchComp.length == 1 && lineSketchComp[0] instanceof sketchPackage.SketchAttribute) { // 예외처리
     			// 한 행에 속성만 있는 경우
     			if (i == 0) { // 첫 행이면 위가 없으므로 아래쪽으로 마진
     				lineSketchComp[0].direction = "bottom";
@@ -233,83 +341,23 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
     			attrStyle = lineSketchComp[0].getCss();
 	    	} else {
 	    		var selector = lineSketchComp[j].strName;
-	    		var delHtml = jQuery(selector).wrap("<span></span>").parent().html();
+	    		var delHtml = jQuery(selector).wrap("<span></span>").parent().html();	    		
+	    		jQuery(selector).unwrap("<span></span>");
+
 		    	allHtml = String(allHtml).replace(delHtml, "");
-
-		    	// 한 행에 셀렉터가 한 개만 있는 경우가 아니면,
-		    	// display가 block인 셀렉터는 inline-block으로 변경
-		    	if (lineSketchComp.length > 1 &&
-					jQuery(selector).css("display") == "block") {
-		    			
-		    		jQuery(selector).css("display", "inline-block");
-
-		    		if (j != lineSketchComp.length - 1) {
-		    			jQuery(selector).css("float", "left");
-		    		}
-		    	}
-		    	
-		    	// 넓이 분배
-		    	if (j == 0) {
-			    	var per100Width = 0;
-	    			var totWidth = 0;
-	    			var freeWidth = 0;
-	    			var cnt = 0;
-
-	    			for (var k = 0; k < lineSketchComp.length; k++) {
-	    				var selector2 = lineSketchComp[k].strName;
-	    				if (k == 0) {
-	    					per100Width = Number(jQuery(selector2).wrap("<div></div>").parent().css("width").replace("px", ""));
-	    					jQuery(selector2).unwrap("<div></div>");
-	    				}
-	    				
-	    				var borderWidth = Number(jQuery(selector2).css("border").split(" ")[0].replace("px", ""));
-	    				var bodyWidth = Number(jQuery(selector2)[0].style.width.replace("px", ""));
-
-						var attrWidth = 0;
-						var sketchAttributes = lineSketchComp[k].sketchAttributes;						
-	    				for (var l = 0; l < sketchAttributes.length; l++) {
-	    					var index = sketchAttributes[l].values[0].indexOf("px");
-
-	    					if (index > -1) {
-	    						attrWidth += Number(sketchAttributes[l].values[0].substring(0, index));
-	    					}
-	    				}
-
-	    				totWidth += attrWidth + bodyWidth + borderWidth * 2;
-
-						if (bodyWidth == 0) {
-	    					cnt++;
-	    				}
-	    			}
-
-	    			freeWidth = per100Width - totWidth;
-
-	    			var width = Math.floor(
-	    							( ( freeWidth / per100Width ) * 100 ) / cnt    									
-	    						* 100) / 100 + "%";
-
-	    			
-	    			var mapper = new sketchPackage.SketchMapper();
-	    			sketchAttribute = new sketchPackage.SketchAttribute();
-
-	    			sketchAttribute.values[0] = width;
-	    			sketchAttribute.pattern = mapper.map(sketchAttribute.values[0]);
-	    		}
-	    		
-	    		if (jQuery(selector)[0].style.width == "") {
-	    			
-	    			lineSketchComp[j].addSketchAttribute(sketchAttribute);
-	    		}
 
 		    	nLineHtml = lineSketchComp[j].getInnerHtml();
 	    	}
 
 	    	// 한 행은 하나의 div로 감싼다
-	    	if (j == 0) {
-	    		nLineHtml = "<div style='" + attrStyle + "'>" + nLineHtml;
-	    	}
-	    	if (j == lineSketchComp.length - 1) {
-	    		nLineHtml = nLineHtml + "</div>";
+	    	if (attrStyle != "") {
+		    	if (j == 0) {		    		
+		    		nLineHtml = "<div style='" + attrStyle + "'>" + nLineHtml;
+		    	}
+		    	
+		    	if (j == lineSketchComp.length - 1) {
+		    		nLineHtml = nLineHtml + "</div>";
+		    	}
 	    	}
 
 	    	nAllHtml += nLineHtml + "\n";
