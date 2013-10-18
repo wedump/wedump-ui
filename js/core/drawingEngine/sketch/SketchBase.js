@@ -231,6 +231,28 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 	var sketchPackage = wedump.core.drawingEngine.sketch;
 	var mapper = new sketchPackage.SketchMapper();	
 
+	// CSS를 사용자가 embedded로 선언했을 경우 Width를 구하는 함수
+	var getEmbeddedWidth = function(selector, flag) {	
+		var value = 0;
+		var rules = document.styleSheets[0].rules;
+
+		for (var i = 0; i < rules.length; i++) {
+			var selectorText = rules[i].selectorText;
+
+			for (var j = 0; j < jQuery(selectorText).length; j++) {
+				if (jQuery(selectorText)[j] == jQuery(selector)[0]) {
+					if (flag == "width") {
+						value = Number(rules[i].style.width.replace("px", ""));					
+					} else if (flag == "border") {
+						value = Number(rules[i].style.border.split(" ")[0].replace("px", ""));
+					}
+				}
+			}
+		}
+
+		return value;
+	}
+
 	for (var i = 0; i < arrSketchComp.length; i++) {
 		var sketchAttribute;
 		var selector = arrSketchComp[i].strName;
@@ -249,38 +271,49 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 			var freeWidth = 0; // 남은 공간
 			var cnt = 0;
 
-			for (var k = 0; k < arrSketchComp.length; k++) {
-				var selector2 = arrSketchComp[k].strName;
+			for (var j = 0; j < arrSketchComp.length; j++) {
+				var selector2 = arrSketchComp[j].strName;
 
-				if (k == 0) {
+				if (j == 0) {
 					per100Width = Number(jQuery(selector2).wrap("<div></div>").parent().css("width").replace("px", ""));
 					jQuery(selector2).unwrap("<div></div>");
 				}
 				
-				var borderWidth = Number(jQuery(selector2)[0].style.border.split(" ")[0].replace("px", ""));
-				var bodyWidth = Number(jQuery(selector2)[0].style.width.replace("px", ""));
+				var borderWidth = 0;
+				var bodyWidth   = 0;
 
-				var attrWidth = 0; // 속성 width
-				var sketchAttributes = arrSketchComp[k].sketchAttributes;				
-				var gSketchAttributes = new Array();
+				borderWidth = getEmbeddedWidth(selector2, "border");
+				bodyWidth   = getEmbeddedWidth(selector2, "width");
 
-				if (arrSketchComp[k].sketchGroup instanceof sketchPackage.SketchGroup) {
-					gSketchAttributes = arrSketchComp[k].sketchGroup.sketchAttributes;					
+				// CSS를 사용자가 inline으로 선언했을 경우
+				if (borderWidth == 0) {
+					borderWidth = Number(jQuery(selector2)[0].style.border.split(" ")[0].replace("px", ""));
+				}
+				if (bodyWidth == 0) {
+					bodyWidth = Number(jQuery(selector2)[0].style.width.replace("px", ""));
 				}
 
-				for (var l = 0; l < sketchAttributes.length; l++) { // 셀렉터 속성
-					var index = sketchAttributes[l].values[0].indexOf("px");
+				var attrWidth = 0; // 속성 width
+				var sketchAttributes = arrSketchComp[j].sketchAttributes;				
+				var gSketchAttributes = new Array();
+
+				if (arrSketchComp[j].sketchGroup instanceof sketchPackage.SketchGroup) {
+					gSketchAttributes = arrSketchComp[j].sketchGroup.sketchAttributes;					
+				}
+
+				for (var k = 0; k < sketchAttributes.length; k++) { // 셀렉터 속성
+					var index = sketchAttributes[k].values[0].indexOf("px");
 
 					if (index > -1) {
-						attrWidth += Number(sketchAttributes[l].values[0].substring(0, index));
+						attrWidth += Number(sketchAttributes[k].values[0].substring(0, index));
 					}
 				}
 
-				for (var l = 0; l < gSketchAttributes.length; l++) { // 그룹 속성
-					var index = gSketchAttributes[l].values[0].indexOf("px");
+				for (var k = 0; k < gSketchAttributes.length; k++) { // 그룹 속성
+					var index = gSketchAttributes[k].values[0].indexOf("px");
 
 					if (index > -1) {
-						attrWidth += Number(gSketchAttributes[l].values[0].substring(0, index));
+						attrWidth += Number(gSketchAttributes[k].values[0].substring(0, index));
 					}
 				}
 
@@ -302,7 +335,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 		}
 
 		if (!inlineYn) {
-			if (jQuery(selector)[0].style.width == "") {
+			if (jQuery(selector)[0].style.width == "" && getEmbeddedWidth(selector, "width") == 0) {
 				arrSketchComp[i].addSketchAttribute(sketchAttribute);
 			}
 		}
@@ -323,7 +356,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
     var allHtml  = jQuery(target).html();
     var nAllHtml = "";    
 
-    for (var i = 0; i < arrSketchComp.length; i++) {    	
+    for (var i = 0; i < arrSketchComp.length; i++) {
     	var lineSketchComp = arrSketchComp[i];
     	
     	for (var j = 0; j < lineSketchComp.length; j++) {
@@ -352,7 +385,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
 	    	// 한 행은 하나의 div로 감싼다
 	    	if (attrStyle != "") {
 		    	if (j == 0) {		    		
-		    		nLineHtml = "<div style='" + attrStyle + "'>" + nLineHtml;
+		    		nLineHtml = "<div style='border: 0; " + attrStyle + "'>" + nLineHtml;
 		    	}
 		    	
 		    	if (j == lineSketchComp.length - 1) {

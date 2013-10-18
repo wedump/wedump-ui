@@ -50,7 +50,7 @@ wedump.core.Wedump.prototype = {
 		var sketchComp = this.arrSketch[this.arrSketch.length - 1];
 
 		// 화면 리사이즈 시 넓이배분을 다시 하기 위해 이벤트 설정
-		jQuery(window).bind("resize", function(e) {
+		jQuery(window).on("resize", function(e) {
 			sketchComp.draw();
 		}).trigger("resize");
 		
