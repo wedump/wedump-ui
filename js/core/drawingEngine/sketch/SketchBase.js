@@ -233,6 +233,8 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 
 	// CSS를 사용자가 embedded로 선언했을 경우 Width를 구하는 함수
 	var getEmbeddedWidth = function(selector, flag) {	
+		if (typeof document.styleSheets[0] == "undefined") return 0;
+
 		var value = 0;
 		var rules = document.styleSheets[0].rules;
 
