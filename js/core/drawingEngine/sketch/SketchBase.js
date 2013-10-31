@@ -229,10 +229,11 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 	if (arrSketchComp.length == 1) return arrSketchComp;
 
 	var sketchPackage = wedump.core.drawingEngine.sketch;
-	var mapper = new sketchPackage.SketchMapper();	
+	var mapper = new sketchPackage.SketchMapper();
+	var sketchAttribute;
 
-	// CSS를 사용자가 embedded로 선언했을 경우 Width를 구하는 함수
-	var getEmbeddedWidth = function(selector, flag) {	
+	// 사용자가 CSS를 embedded로 선언했을 경우 Width를 구하는 함수
+	var getEmbeddedWidth = function(selector, flag) {
 		if (typeof document.styleSheets[0] == "undefined") return 0;
 
 		var value = 0;
@@ -242,21 +243,14 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 			var selectorText = rules[i].selectorText;
 
 			for (var j = 0; j < jQuery(selectorText).length; j++) {
-				if (jQuery(selectorText)[j] == jQuery(selector)[0]) {
-					if (flag == "width") {
-						value = Number(rules[i].style.width.replace("px", ""));					
-					} else if (flag == "border") {
-						value = Number(rules[i].style.border.split(" ")[0].replace("px", ""));
-					}
-				}
+				value = Number(rules[i].style[flag].split(" ")[0].replace("px", ""));				
 			}
 		}
 
 		return value;
 	}
-
+	
 	for (var i = 0; i < arrSketchComp.length; i++) {
-		var sketchAttribute;
 		var selector = arrSketchComp[i].strName;
 		var inlineYn = jQuery(selector).css("display") == "inline";
 
@@ -264,9 +258,9 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 
 		if (i != arrSketchComp.length - 1) {
 			jQuery(selector).css("float", "left");
-		}
+		}	
 		
-		// 넓이 분배		    	
+		// 넓이 구하기
 		if (i == 0) {
 	    	var per100Width = 0; // 현재화면 100%의 width(px)
 			var totWidth = 0; // 존재하는 컴포넌트의 width 합
@@ -277,7 +271,12 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 				var selector2 = arrSketchComp[j].strName;
 
 				if (j == 0) {
-					per100Width = Number(jQuery(selector2).wrap("<div></div>").parent().css("width").replace("px", ""));
+					jQuery(selector2).wrap("<div></div>");
+
+					var width   = Number(jQuery(selector2).parent().css("width").replace("px", ""));
+					var border  = Number(jQuery(selector2).parent().css("border").split(" ")[0].replace("px", ""));
+					per100Width = width + border * 2;
+
 					jQuery(selector2).unwrap("<div></div>");
 				}
 				
@@ -333,9 +332,10 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 			sketchAttribute = new sketchPackage.SketchAttribute();
 
 			sketchAttribute.values[0] = width;
-			sketchAttribute.pattern = mapper.map("0%"); // css속성 width 매핑
+			sketchAttribute.pattern = mapper.map("width", true); // css속성 width 매핑
 		}
 
+		// 넓이 분배
 		if (!inlineYn) {
 			if (jQuery(selector)[0].style.width == "" && getEmbeddedWidth(selector, "width") == 0) {
 				arrSketchComp[i].addSketchAttribute(sketchAttribute);

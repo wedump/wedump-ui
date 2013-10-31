@@ -26,14 +26,16 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 
 			var lineSketchComp;
 
-			for (var i = 0; i < arrStrSketch.length; i++) {				
+			for (var i = 0; i < arrStrSketch.length; i++) {
+				if (arrStrSketch[i].replace(/(^\s*)|(\s*$)/g, "") == "") continue;
+
 				lineSketchComp = sketch.sortAttribute(arrStrSketch[i]);
 				lineSketchComp = sketch.sortSketchComponent(lineSketchComp);
 				lineSketchComp = sketch.applyCssPattern(lineSketchComp);
 				lineSketchComp = sketch.divisionWidth(lineSketchComp);
 
-				sketch.arrSketchComp[i] = lineSketchComp;
-			}			
+				sketch.arrSketchComp[sketch.arrSketchComp.length] = lineSketchComp;
+			}
 
 			sketch.arrSketchComp = sketch.rerendering(sketch.arrSketchComp, target);
 		};
@@ -115,5 +117,7 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 
 			jQuery(target).html(innerHtml);
 		}
+
+		this.arrSketchComp = new Array();
 	}
 };

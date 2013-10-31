@@ -9,11 +9,15 @@ wedump.core.drawingEngine.sketch.SketchMapper = function() {
 	// 줄의 마지막에는 \n\ 을 붙여주어야 함
 	// 대응변수는 &로 시작하며, 들어오는 파라미터가 순차적으로 대입됨
 	// 대응변수에 영문 또는 영문과 숫자의 조합
-	this.patterns =
+	this.publicPatterns =
 	"															  	   \n\
 	margin		;; /^[0-9]+(px)$/		 ;; margin-&direction: &value; \n\
-	float		;; /^(left|right)$/		 ;; float: &value;		       \n\
-	width		;; /^[0-9]+(.[0-9]+)?%$/ ;; width: &value;			   \n\
+	";
+
+	this.privatePatterns =
+	"																   \n\
+	float		;; 		 				 ;; float: &value;		       \n\
+	width		;;  					 ;; width: &value;			   \n\
 	";
 };
 
@@ -24,15 +28,22 @@ wedump.core.drawingEngine.sketch.SketchMapper.prototype = {
 	 * @param {String} 사용자로 부터 넘어온 속성 문자열
 	 * @return {String} 대응식
 	 */
-	map : function(strAttrPattern) {
-		var arrPattern = this.getPatterns();
+	map : function(strAttrPattern, privateFlag) {
+		var arrPattern = this.getPatterns(privateFlag);
 
 		for (var i = 0; i < arrPattern.length; i++) {
-			var regExp = eval(arrPattern[i].regExp);
-			var correspond = arrPattern[i].correspond;
+			var patternName = arrPattern[i].patternName;
+			var regExp      = eval(arrPattern[i].regExp);
+			var correspond  = arrPattern[i].correspond;
 
-			if (regExp.test(strAttrPattern)) {
-				return correspond;
+			if (privateFlag) {
+				if (patternName == strAttrPattern) {
+					return correspond;
+				}
+			} else {
+				if (regExp.test(strAttrPattern)) {
+					return correspond;
+				}
 			}
 		}
 
@@ -44,15 +55,19 @@ wedump.core.drawingEngine.sketch.SketchMapper.prototype = {
 	 * getPatterns : 패턴 문자열을 배열로 변환하여 반환
 	 * @return {Array} 스케치 CSS패턴 배열
 	 */
-	getPatterns : function() {		
+	getPatterns : function(privateFlag) {		
 		var result = new Array();
-		var arrPatterns = this.patterns.split("\n");
+		var arrPatterns = this.publicPatterns.split("\n");
+		
+		if (privateFlag) {
+			arrPatterns = this.privatePatterns.split("\n");
+		}
 		
 		for (var i = 0; i < arrPatterns.length; i++) {
 			var pattern = arrPatterns[i].replace(/(^\s*)|(\s*$)/gi, "");
 			
 			if (pattern !== "") {
-				var patternSplit = pattern.split(";;");				
+				var patternSplit = pattern.split(";;");
 				var patternName  = patternSplit[0].replace(/(^\s*)|(\s*$)/gi, ""); // 패턴명
 				var regExp		 = patternSplit[1].replace(/(^\s*)|(\s*$)/gi, ""); // 정규식
 				var correspond   = patternSplit[2].replace(/(^\s*)|(\s*$)/gi, ""); // 대응식
