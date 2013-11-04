@@ -10,14 +10,14 @@ wedump.core.drawingEngine.sketch.SketchMapper = function() {
 	// 대응변수는 &로 시작하며, 들어오는 파라미터가 순차적으로 대입됨
 	// 대응변수에 영문 또는 영문과 숫자의 조합
 	this.publicPatterns =
-	"															  	   \n\
-	margin		;; /^[0-9]+(px)$/		 ;; margin-&direction: &value; \n\
+	"																	\n\
+	margin 		;; /^[0-9]+(px)$/		;; margin-&direction: &value;	\n\
+	float 		;; /^(left|right)$/		;; float: &value;				\n\
 	";
 
 	this.privatePatterns =
-	"																   \n\
-	float		;; 		 				 ;; float: &value;		       \n\
-	width		;;  					 ;; width: &value;			   \n\
+	"																	\n\
+	width 		;;						;; width: &value;				\n\
 	";
 };
 

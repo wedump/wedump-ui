@@ -37,7 +37,7 @@ wedump.core.drawingEngine.sketch.SketchGroup.prototype = {
 				style += this.sketchAttributes[i].getCss();
 			}
 
-			html += " style='display: inline-block; " + style + "'>";
+			html += " style='display: inline-block; border: 0; " + style + "'>";
 		} else if (this.order == this.LAST) {
 			html += "</div>";
 		}

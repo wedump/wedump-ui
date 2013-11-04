@@ -386,7 +386,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.rerendering = function(arr
 
 	    	// 한 행은 하나의 div로 감싼다
 	    	if (attrStyle != "") {
-		    	if (j == 0) {		    		
+		    	if (j == 0) {
 		    		nLineHtml = "<div style='border: 0; " + attrStyle + "'>" + nLineHtml;
 		    	}
 		    	
