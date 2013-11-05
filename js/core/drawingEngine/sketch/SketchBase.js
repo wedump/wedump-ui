@@ -223,9 +223,10 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.applyCssPattern = function
  * (public)
  * divisionWidth : 각 셀렉터들에 알맞은 넓이를 분배
  * @param {Array} 스케치 컴포넌트 객체 배열 
+ * @param {int} 현재 window의 width
  * @return {Array} 스케치 컴포넌트 객체 배열
  */
-wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(arrSketchComp) {
+wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(arrSketchComp, currPer100Width) {
 	if (arrSketchComp.length == 1) return arrSketchComp;
 
 	var sketchPackage = wedump.core.drawingEngine.sketch;
@@ -262,7 +263,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 		
 		// 넓이 구하기
 		if (i == 0) {
-	    	var per100Width = 0; // 현재화면 100%의 width(px)
+	    	var per100Width = currPer100Width; // 현재화면 100%의 width(px)
 			var totWidth = 0; // 존재하는 컴포넌트의 width 합
 			var freeWidth = 0; // 남은 공간
 			var cnt = 0;
@@ -270,7 +271,7 @@ wedump.core.drawingEngine.sketch.SketchBase.prototype.divisionWidth = function(a
 			for (var j = 0; j < arrSketchComp.length; j++) {
 				var selector2 = arrSketchComp[j].strName;
 
-				if (j == 0) {
+				if (j == 0 && !currPer100Width) {
 					jQuery(selector2).wrap("<div></div>");
 
 					var width   = Number(jQuery(selector2).parent().css("width").replace("px", ""));

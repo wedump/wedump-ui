@@ -32,13 +32,19 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 				lineSketchComp = sketch.sortAttribute(arrStrSketch[i]);
 				lineSketchComp = sketch.sortSketchComponent(lineSketchComp);
 				lineSketchComp = sketch.applyCssPattern(lineSketchComp);
-				lineSketchComp = sketch.divisionWidth(lineSketchComp);
+				lineSketchComp = sketch.divisionWidth(lineSketchComp, windowWidth);
 
 				sketch.arrSketchComp[sketch.arrSketchComp.length] = lineSketchComp;
 			}
 
 			sketch.arrSketchComp = sketch.rerendering(sketch.arrSketchComp, target);
 		};
+
+		var windowWidth;
+
+		if (jQuery(document).height() > jQuery(window).height()) { // 스크롤이 있을 경우
+			windowWidth = jQuery(window).width();
+		}
 
 		this.undo();
 
@@ -89,9 +95,10 @@ wedump.core.drawingEngine.sketch.Sketch.prototype = {
 	 * (public)
 	 * divisionWidth : 각 셀렉터들에 알맞은 넓이를 분배
 	 * @param {Array} 스케치 컴포넌트 객체 배열 
+	 * @param {int} 현재 window의 width
 	 * @return {Array} 스케치 컴포넌트 객체 배열
 	 */
-	divisionWidth : function(arrSektchComp) {
+	divisionWidth : function(arrSektchComp, windowWidth) {
 		throw new Error("must override divisionWidth method");	
 	},
 

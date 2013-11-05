@@ -53,6 +53,8 @@ wedump.core.Wedump.prototype = {
 		jQuery(window).on("resize", function(e) {
 			sketchComp.draw();
 		}).trigger("resize");
+
+		jQuery(window).trigger("resize"); // 1회 draw 이 후 width를 파악해 컴포넌트들의 width를 재정의하기 위해 1번 더 실행
 		
 		return sketchComp;
 	},
