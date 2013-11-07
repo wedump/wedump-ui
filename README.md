@@ -9,7 +9,7 @@ We started Wedump's second project.<br><br>
 <pre>
 Structure of Wedump project
   Part1. Portlet-based UI framework
-  Part2. SNS + blog type of web application
+  Part2. Web application of SNS + blog type
 </pre><br>
 
 We hope that your interest and participation.<br><br>
